@@ -72,7 +72,7 @@ class LeetPushUIOverlay {
         <span class="leetpush-spinner"></span>
         <span>Pushing <strong>${slug || "solution"}</strong> to GitHub...</span>
       `,
-      detailsHtml: '<span class="leetpush-subtext">Connecting to sync bridge...</span>',
+      detailsHtml: '<span class="leetpush-subtext">Pushing to main branch...</span>',
       actionsHtml: ""
     });
   }

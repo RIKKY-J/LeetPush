@@ -11,8 +11,6 @@
   "host_permissions": [
     "https://leetcode.com/*",
     "https://leetcode.cn/*",
-    "http://localhost:3000/*",
-    "http://127.0.0.1:3000/*",
     "https://api.github.com/*"
   ],
   "background": {

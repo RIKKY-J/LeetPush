@@ -85,60 +85,50 @@
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Super Simple 2-Minute Setup (Zero Localhost Needed!)
 
-### 1. Clone & Setup Repository
+LeetPush runs **100% self-contained directly inside Google Chrome**. It starts automatically whenever your browser opens — **no terminal commands, no localhost server, and no background processes required!**
 
-```bash
-git clone https://github.com/RIKKY-J/LeetPush.git
-cd LeetPush
-```
+### Step 1: Load Extension into Chrome
 
-### 2. Configure & Start Companion Server
+1. Open Chrome and go to `chrome://extensions` in the address bar.
+2. In the top-right corner, toggle **Developer mode** to **ON**.
+3. In the top-left, click **Load unpacked**.
+4. Select the `LeetPush/extension` folder (or extract `leetpush-extension.zip`).
 
-```bash
-# Navigate to server directory and install dependencies
-cd server
-npm install
+### Step 2: Paste Your GitHub Link & Token
 
-# Copy example environment configuration
-cp .env.example .env
-```
+1. Click the **LeetPush** icon in your Chrome toolbar.
+2. **GitHub Repository Address**: Simply paste your repository link:
+   ```text
+   https://github.com/RIKKY-J/LeetPush.git
+   ```
+   *(Or just `RIKKY-J/LeetPush`)*
+3. **Personal Access Token**: Click **"🔑 Generate Token ↗"** (pre-checks the `repo` permission), generate your token, and paste it into the field.
+4. Click **"Connect & Save"**.
 
-Open `server/.env` in your text editor and fill in your GitHub details:
-
-```env
-PORT=3000
-GITHUB_TOKEN=ghp_your_personal_access_token_here
-GITHUB_OWNER=your-github-username
-GITHUB_REPO=LeetPush
-GITHUB_BRANCH=main
-GITHUB_BASE_DIR=leetcode
-```
-
-> **How to create a GitHub Token**:
-> 1. Visit [GitHub Token Settings](https://github.com/settings/tokens).
-> 2. Generate a **Personal Access Token (Classic)** with the `repo` scope (or a fine-grained token with *Contents: Read & Write* permission).
-
-Start the companion server:
-
-```bash
-npm start
-# Or for live auto-reload during development:
-npm run dev
-```
-
-Visit **`http://localhost:3000`** in your browser to verify the companion dashboard is running!
+That's all! You will see:
+`✓ Connected to RIKKY-J/LeetPush! Ready to auto-sync to main.`
 
 ---
 
-### 3. Load Extension in Google Chrome
+### Step 3: Solve Problems on LeetCode!
 
-1. Open Chrome and navigate to `chrome://extensions`.
-2. Toggle **Developer mode** on (top-right corner).
-3. Click **Load unpacked** (top-left).
-4. Select the `LeetPush/extension` directory from your computer.
-5. The **LeetPush** icon will appear in your Chrome toolbar!
+1. Open any problem on [LeetCode](https://leetcode.com/problems/).
+2. Submit your solution.
+3. Once LeetCode marks it **Accepted**, LeetPush immediately pushes the solution directly to the `main` branch of your GitHub repository!
+
+---
+
+### 🖥️ Optional Companion Server Mode
+
+If you prefer running a dedicated local Node.js server bridge, the companion server is still included in `server/`:
+```bash
+cd server
+npm install
+npm start
+```
+Visit `http://localhost:3000` to view the companion web dashboard.
 
 ---
 

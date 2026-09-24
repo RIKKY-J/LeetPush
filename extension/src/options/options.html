@@ -24,72 +24,31 @@
         </div>
         <div>
           <h1>LeetPush Configuration</h1>
-          <p>Configure synchronization preferences for your GitHub repository</p>
+          <p>Direct GitHub synchronization &bull; Zero localhost required</p>
         </div>
       </div>
       <div class="header-badges">
-        <span class="badge" id="mode-badge">Companion Mode</span>
+        <span class="badge" id="mode-badge">Direct Sync (Main)</span>
       </div>
     </header>
 
     <form id="settings-form">
-      <!-- Sync Architecture Mode -->
+      <!-- GitHub Repository Address Bar -->
       <div class="card glass-card">
-        <h3>Sync Architecture Mode</h3>
-        <p class="card-desc">Choose how the Chrome extension communicates with your GitHub repository.</p>
-        
-        <div class="mode-selector">
-          <label class="mode-option" id="mode-companion-label">
-            <input type="radio" name="syncMode" value="companion" id="mode-companion" checked>
-            <div class="mode-card">
-              <div class="mode-title">
-                <strong>Companion Server (Recommended)</strong>
-                <span class="badge-rec">Recommended</span>
-              </div>
-              <p>Uses local Node.js companion service. GitHub personal token is kept securely on localhost in <code>server/.env</code> and never exposed to the browser.</p>
-            </div>
-          </label>
+        <h3>GitHub Repository</h3>
+        <p class="card-desc">Simply paste your GitHub repository link. Submissions are pushed directly to the <strong>main</strong> branch.</p>
 
-          <label class="mode-option" id="mode-direct-label">
-            <input type="radio" name="syncMode" value="direct" id="mode-direct">
-            <div class="mode-card">
-              <div class="mode-title">
-                <strong>Direct GitHub API (Standalone)</strong>
-              </div>
-              <p>Extension communicates directly with GitHub REST API using a Personal Access Token stored securely in Chrome storage. No local server required.</p>
-            </div>
-          </label>
-        </div>
-
-        <!-- Companion Server URL Config -->
-        <div class="form-group" id="companion-config-group">
-          <label for="serverUrl">Companion Server URL</label>
-          <input type="url" id="serverUrl" placeholder="http://localhost:3000" value="http://localhost:3000" required>
-          <span class="input-hint">Default local server runs on port 3000 (start via <code>npm run server</code>).</span>
-        </div>
-
-        <!-- Direct Token Config -->
-        <div class="form-group" id="direct-token-group" style="display: none;">
-          <label for="githubToken">GitHub Personal Access Token</label>
-          <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-          <span class="input-hint">Requires <code>repo</code> scope (classic) or Contents read/write (fine-grained).</span>
-        </div>
-      </div>
-
-      <!-- GitHub Repository Configuration -->
-      <div class="card glass-card">
-        <h3>GitHub Repository Details</h3>
-        <p class="card-desc">Specify where your LeetCode solutions should be committed.</p>
-
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label for="owner">GitHub Owner / Organization</label>
-            <input type="text" id="owner" placeholder="e.g. RIKKY-J" value="RIKKY-J" required>
-          </div>
-          <div class="form-group flex-1">
-            <label for="repo">Repository Name</label>
-            <input type="text" id="repo" placeholder="e.g. LeetPush" value="LeetPush" required>
-          </div>
+        <div class="form-group">
+          <label for="repoUrl">Repository Address</label>
+          <input 
+            type="text" 
+            id="repoUrl" 
+            placeholder="https://github.com/RIKKY-J/LeetPush.git or RIKKY-J/LeetPush" 
+            value="https://github.com/RIKKY-J/LeetPush.git" 
+            required
+            spellcheck="false"
+          >
+          <span class="input-hint">Accepted formats: <code>https://github.com/user/repo</code> or <code>user/repo</code></span>
         </div>
 
         <div class="form-row">
@@ -100,14 +59,36 @@
           <div class="form-group flex-1">
             <label for="baseDir">Base Directory in Repository</label>
             <input type="text" id="baseDir" placeholder="leetcode" value="leetcode" required>
-            <span class="input-hint">Solutions will be saved at: <code>{baseDir}/{slug}/solution.{ext}</code></span>
+            <span class="input-hint">Path: <code>{baseDir}/{slug}/solution.{ext}</code></span>
           </div>
         </div>
       </div>
 
-      <!-- Automation & Preferences -->
+      <!-- Authentication -->
       <div class="card glass-card">
-        <h3>Automation &amp; Notification Preferences</h3>
+        <div class="card-title-row">
+          <h3>GitHub Authentication</h3>
+          <a href="https://github.com/settings/tokens/new?scopes=repo&description=LeetPush" target="_blank" rel="noopener" class="token-helper-btn">
+            🔑 Generate Token in 1-Click ↗
+          </a>
+        </div>
+        <p class="card-desc">Your Personal Access Token is saved securely in your browser's private local storage.</p>
+
+        <div class="form-group">
+          <label for="githubToken">GitHub Personal Access Token</label>
+          <input 
+            type="password" 
+            id="githubToken" 
+            placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" 
+            spellcheck="false"
+          >
+          <span class="input-hint">Requires <code>repo</code> scope for pushing solutions to your repository.</span>
+        </div>
+      </div>
+
+      <!-- Preferences -->
+      <div class="card glass-card">
+        <h3>Sync Preferences</h3>
 
         <div class="checkbox-group">
           <label class="checkbox-label">
@@ -115,16 +96,7 @@
             <span class="custom-check"></span>
             <div class="checkbox-text">
               <strong>Automatically push accepted submissions</strong>
-              <p>Automatically triggers push as soon as LeetCode says "Accepted".</p>
-            </div>
-          </label>
-
-          <label class="checkbox-label">
-            <input type="checkbox" id="acceptedOnly" checked>
-            <span class="custom-check"></span>
-            <div class="checkbox-text">
-              <strong>Push only accepted submissions</strong>
-              <p>Ignore Wrong Answer, Time Limit Exceeded, or Compile Errors.</p>
+              <p>Triggers sync as soon as LeetCode says "Accepted".</p>
             </div>
           </label>
 
@@ -133,7 +105,7 @@
             <span class="custom-check"></span>
             <div class="checkbox-text">
               <strong>Generate problem README.md</strong>
-              <p>Creates a clean problem description markdown file alongside the solution.</p>
+              <p>Creates a formatted problem description with difficulty badge alongside the code.</p>
             </div>
           </label>
 
@@ -142,7 +114,7 @@
             <span class="custom-check"></span>
             <div class="checkbox-text">
               <strong>Show desktop notifications</strong>
-              <p>Display a Chrome system notification upon successful push or error.</p>
+              <p>Display a Chrome notification when code is committed.</p>
             </div>
           </label>
         </div>
