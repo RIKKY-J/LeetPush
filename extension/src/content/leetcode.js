@@ -130,18 +130,43 @@
     }
   }
 
-  // 3. Listen for messages from injected interceptor script
+  // 3. User click listener to strictly distinguish Submit from Run
+  let userClickedSubmit = false;
+  let submitClickTime = 0;
+
+  document.addEventListener("click", (e) => {
+    const target = e.target;
+    if (!target) return;
+
+    const btn = target.closest("button");
+    if (!btn) return;
+
+    const text = (btn.textContent || "").trim().toLowerCase();
+    const e2e = btn.getAttribute("data-e2e-locator") || "";
+
+    if (e2e === "console-run-button" || text === "run" || text.startsWith("run ")) {
+      userClickedSubmit = false;
+      console.log("[LeetPush] User clicked Run Test Cases. Auto-push disabled.");
+    } else if (e2e === "console-submit-button" || text === "submit" || text.startsWith("submit ")) {
+      userClickedSubmit = true;
+      submitClickTime = Date.now();
+      console.log("[LeetPush] User clicked Submit Solution. Auto-push enabled.");
+    }
+  }, true);
+
+  // 4. Listen for messages from injected interceptor script
   window.addEventListener("message", (event) => {
     if (event.source !== window) return;
     if (event.data?.source !== "LEETPUSH_PAGE_INTERCEPTOR") return;
 
     if (event.data.type === "SUBMISSION_ACCEPTED") {
-      console.log("[LeetPush] Received SUBMISSION_ACCEPTED event from interceptor:", event.data.payload);
+      userClickedSubmit = false;
+      console.log("[LeetPush] Received verified SUBMISSION_ACCEPTED event from interceptor:", event.data.payload);
       handleAcceptedSubmission(event.data.payload);
     }
   });
 
-  // 4. Fallback DOM MutationObserver
+  // 5. Fallback DOM MutationObserver (ONLY fires if a real Submit click occurred)
   let observerTimer = null;
   const domObserver = new MutationObserver(() => {
     if (observerTimer) clearTimeout(observerTimer);
@@ -150,8 +175,14 @@
       if (Date.now() - lastProcessedTime < 8000) return;
       if (isPushing) return;
 
+      // STRICT CHECK: Only trigger if the user actually clicked the Submit button!
+      if (!userClickedSubmit || (Date.now() - submitClickTime > 90000)) {
+        return;
+      }
+
       if (provider.isAcceptedInDOM()) {
-        console.log("[LeetPush] Accepted status detected in DOM via MutationObserver.");
+        console.log("[LeetPush] Real Accepted status detected in DOM after Submit click.");
+        userClickedSubmit = false;
         const fallbackCode = provider.getCodeFromEditor();
         if (fallbackCode) {
           handleAcceptedSubmission({ code: fallbackCode });

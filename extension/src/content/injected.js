@@ -1,17 +1,16 @@
 /**
  * LeetPush Injected Script (Runs in LeetCode Page Context / MAIN World)
- * Intercepts LeetCode network requests and responses to capture:
- * 1. The EXACT language and code submitted (from POST /submit/)
- * 2. The Accepted status and runtime metrics (from /check/ and GraphQL)
+ * Intercepts LeetCode network requests to ONLY trigger on real Accepted Submissions.
+ * STRICTLY ignores "Run Code" / test case executions (/interpret_solution/).
  */
 (function() {
   if (window.__LEETPUSH_INJECTED__) return;
   window.__LEETPUSH_INJECTED__ = true;
 
-  console.log("[LeetPush] Network interceptor initialized.");
+  console.log("[LeetPush] Submission-only network interceptor initialized.");
 
-  // Holds the most recently submitted payload from the user
-  let pendingSubmission = null;
+  // Holds data ONLY when the user clicks the real "Submit" button
+  let activeSubmission = null;
 
   function notifyContentScript(type, payload) {
     window.postMessage(
@@ -27,9 +26,7 @@
   function parseBody(body) {
     if (!body) return null;
     try {
-      if (typeof body === "string") {
-        return JSON.parse(body);
-      }
+      if (typeof body === "string") return JSON.parse(body);
       if (body instanceof FormData) {
         const obj = {};
         body.forEach((val, key) => { obj[key] = val; });
@@ -41,40 +38,103 @@
     return null;
   }
 
-  function recordSubmitRequest(url, body) {
-    if (!url || !url.includes("/submit/")) return;
-    const parsed = parseBody(body);
-    if (parsed) {
-      const lang = parsed.lang || parsed.language;
-      const code = parsed.typed_code || parsed.code;
-      const questionId = parsed.question_id || parsed.questionId;
+  function handleOutgoingRequest(url, body) {
+    if (!url) return;
 
-      if (lang || code) {
-        pendingSubmission = {
-          lang: lang ? lang.trim().toLowerCase() : null,
-          code: code || null,
-          questionId: questionId || null,
+    // 1. Explicitly detect "Run Code" (/interpret_solution/) -> Cancel any pending state!
+    if (url.includes("/interpret_solution/") || url.includes("/test/")) {
+      console.log("[LeetPush] User ran test cases. Ignoring from GitHub push.");
+      activeSubmission = null;
+      return;
+    }
+
+    // 2. Real Submission: POST /problems/{slug}/submit/
+    if (url.includes("/submit/")) {
+      const parsed = parseBody(body);
+      if (parsed) {
+        activeSubmission = {
+          lang: parsed.lang ? parsed.lang.trim().toLowerCase() : null,
+          code: parsed.typed_code || parsed.code || null,
+          questionId: parsed.question_id || parsed.questionId || null,
+          submissionId: null,
           timestamp: Date.now()
         };
-        console.log("[LeetPush] Recorded submit request:", {
-          lang: pendingSubmission.lang,
-          hasCode: Boolean(pendingSubmission.code),
-          questionId: pendingSubmission.questionId
+        console.log("[LeetPush] Real submission initiated:", {
+          lang: activeSubmission.lang,
+          questionId: activeSubmission.questionId
         });
       }
     }
   }
 
-  // 1. Intercept fetch
+  function handleSubmissionResponse(url, data) {
+    if (!data) return;
+
+    // Capture submission_id returned from POST /submit/
+    if (url.includes("/submit/") && data.submission_id) {
+      if (activeSubmission) {
+        activeSubmission.submissionId = String(data.submission_id);
+        console.log("[LeetPush] Tracking submission ID:", activeSubmission.submissionId);
+      }
+      return;
+    }
+
+    // CRITICAL FILTER: Ignore testcase checks completely!
+    // Test case checks contain "mysubmission" in the URL or data.interpret_id
+    if (
+      url.includes("interpret") ||
+      url.includes("mysubmission") ||
+      data.interpret_id ||
+      data.interpret_status_code
+    ) {
+      return; // Do NOT process test cases!
+    }
+
+    // Check polling endpoint: /submissions/detail/{id}/check/
+    if (url.includes("/check/")) {
+      // Ensure we have an active submission initiated within the last 3 minutes
+      if (!activeSubmission || (Date.now() - activeSubmission.timestamp > 180000)) {
+        return;
+      }
+
+      // If activeSubmission has an assigned submissionId, ensure the URL matches that ID
+      if (activeSubmission.submissionId && !url.includes(activeSubmission.submissionId)) {
+        return;
+      }
+
+      // Check if the submission finished with "Accepted"
+      if (data.status_msg === "Accepted" || (data.state === "SUCCESS" && data.status_code === 10)) {
+        console.log("[LeetPush] Confirmed Accepted SUBMISSION! Dispatching push event.");
+
+        const finalLang = data.lang || data.pretty_lang || activeSubmission.lang;
+        const finalCode = data.code || activeSubmission.code;
+        const questionId = data.question_id || activeSubmission.questionId;
+        const submissionId = data.submission_id || activeSubmission.submissionId;
+
+        // Reset active submission so it does not fire again
+        activeSubmission = null;
+
+        notifyContentScript("SUBMISSION_ACCEPTED", {
+          code: finalCode,
+          language: finalLang,
+          runtime: data.status_runtime,
+          memory: data.status_memory,
+          runtimePercentile: data.runtime_percentile,
+          memoryPercentile: data.memory_percentile,
+          questionId,
+          submissionId
+        });
+      }
+    }
+  }
+
+  // Intercept fetch
   const originalFetch = window.fetch;
   window.fetch = async function(...args) {
     const url = typeof args[0] === "string" ? args[0] : args[0]?.url || "";
     const options = args[1] || {};
 
-    // Capture submit request payload (lang & code)
-    if (url.includes("/submit/") && options.body) {
-      recordSubmitRequest(url, options.body);
-    }
+    handleOutgoingRequest(url, options.body);
 
     const response = await originalFetch.apply(this, args);
 
@@ -82,37 +142,29 @@
       if (
         url.includes("/submissions/detail/") ||
         url.includes("/check/") ||
-        url.includes("/submit/") ||
-        url.includes("/graphql")
+        url.includes("/submit/")
       ) {
-        const clonedResponse = response.clone();
-        clonedResponse.json().then(data => {
-          handlePossibleSubmissionResponse(url, data);
+        const cloned = response.clone();
+        cloned.json().then(data => {
+          handleSubmissionResponse(url, data);
         }).catch(() => {});
       }
-    } catch (e) {
-      // Ignore
-    }
+    } catch (e) {}
 
     return response;
   };
 
-  // 2. Intercept XMLHttpRequest
+  // Intercept XMLHttpRequest
   const originalXhrOpen = XMLHttpRequest.prototype.open;
   const originalXhrSend = XMLHttpRequest.prototype.send;
 
   XMLHttpRequest.prototype.open = function(method, url) {
     this._leetpush_url = url;
-    this._leetpush_method = method;
     return originalXhrOpen.apply(this, arguments);
   };
 
   XMLHttpRequest.prototype.send = function(body) {
-    this._leetpush_body = body;
-
-    if (this._leetpush_url && this._leetpush_url.includes("/submit/") && body) {
-      recordSubmitRequest(this._leetpush_url, body);
-    }
+    handleOutgoingRequest(this._leetpush_url, body);
 
     this.addEventListener("load", function() {
       try {
@@ -120,63 +172,14 @@
         if (
           url.includes("/submissions/detail/") ||
           url.includes("/check/") ||
-          url.includes("/submit/") ||
-          url.includes("/graphql")
+          url.includes("/submit/")
         ) {
           const data = JSON.parse(this.responseText);
-          handlePossibleSubmissionResponse(url, data);
+          handleSubmissionResponse(url, data);
         }
-      } catch (e) {
-        // Ignore
-      }
+      } catch (e) {}
     });
+
     return originalXhrSend.apply(this, arguments);
   };
-
-  function handlePossibleSubmissionResponse(url, data) {
-    if (!data) return;
-
-    // Pattern 1: Polling check endpoint /submissions/detail/{id}/check/
-    if (data.status_msg === "Accepted" || (data.state === "SUCCESS" && data.status_code === 10)) {
-      // Check if we have a recent pending submission within the last 2 minutes
-      const hasRecentPending = pendingSubmission && (Date.now() - pendingSubmission.timestamp < 120000);
-
-      const finalLang = data.lang || data.pretty_lang || (hasRecentPending ? pendingSubmission.lang : null);
-      const finalCode = data.code || (hasRecentPending ? pendingSubmission.code : null);
-      const questionId = data.question_id || (hasRecentPending ? pendingSubmission.questionId : null);
-
-      console.log("[LeetPush] Accepted submission intercepted. Language:", finalLang);
-
-      notifyContentScript("SUBMISSION_ACCEPTED", {
-        code: finalCode,
-        language: finalLang,
-        runtime: data.status_runtime,
-        memory: data.status_memory,
-        runtimePercentile: data.runtime_percentile,
-        memoryPercentile: data.memory_percentile,
-        questionId: questionId,
-        submissionId: data.submission_id
-      });
-      return;
-    }
-
-    // Pattern 2: GraphQL submissionDetails query
-    if (data.data?.submissionDetails) {
-      const details = data.data.submissionDetails;
-      if (details.statusDisplay === "Accepted") {
-        const langName = details.lang?.name || details.lang;
-        console.log("[LeetPush] GraphQL Accepted submission. Language:", langName);
-
-        notifyContentScript("SUBMISSION_ACCEPTED", {
-          code: details.code,
-          language: langName,
-          runtime: details.runtimeDisplay,
-          memory: details.memoryDisplay,
-          questionId: details.question?.questionId,
-          slug: details.question?.titleSlug,
-          title: details.question?.title
-        });
-      }
-    }
-  }
 })();

@@ -273,21 +273,28 @@ class LeetCodeSubmissionProvider {
   }
 
   /**
-   * Checks if the DOM currently shows an "Accepted" state
+   * Checks if the DOM currently shows a REAL "Accepted" submission state
+   * (Strictly ignores "Run Code" / sample test case panels)
    */
   isAcceptedInDOM() {
     const acceptedSelectors = [
       '[data-e2e-locator="submission-result"]',
       'span[data-e2e-locator="submission-result"]',
-      'div[class*="text-green"]',
-      'div[class*="text-sd-easy"]',
-      'span[class*="text-green"]'
+      'div[class*="submission-result"]',
+      'div[class*="submissions"] div[class*="text-green"]',
+      'div[class*="submissions"] div[class*="text-sd-easy"]'
     ];
 
     for (const sel of acceptedSelectors) {
       const elements = document.querySelectorAll(sel);
       for (const el of elements) {
-        if (el.textContent.trim().toLowerCase().includes("accepted")) {
+        // Exclude elements inside testcase/test-result panels
+        if (el.closest('[id*="testcase"], [class*="testcase"], [class*="test-result"], [data-layout-path*="testcase"]')) {
+          continue;
+        }
+
+        const text = el.textContent.trim().toLowerCase();
+        if (text.includes("accepted")) {
           return true;
         }
       }
@@ -307,6 +314,7 @@ class LeetCodeSubmissionProvider {
     runtime = "",
     memory = ""
   } = {}) {
+    const currentProb = problem || this.getCurrentProblem();
     const rawLang = language || this.getCurrentLanguage();
     const finalLang = this.normalizeLanguage(rawLang) || "cpp";
     const finalCode = code || this.getCodeFromEditor() || "";
