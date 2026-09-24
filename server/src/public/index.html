@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetPush Companion Server Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="background-glow top-left"></div>
+  <div class="background-glow bottom-right"></div>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo-box">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>LeetPush <span class="badge-v1">Companion v1.0</span></h1>
+          <p>Local Bridge &amp; Synchronization Engine for LeetCode to GitHub</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="status-indicator-pill" id="server-status-pill">
+          <span class="status-dot pulsing"></span>
+          <span id="server-status-text">Server Active</span>
+        </div>
+        <button id="refresh-btn" class="btn btn-secondary">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+          </svg>
+          Refresh
+        </button>
+      </div>
+    </header>
+
+    <!-- Status Overview Cards -->
+    <section class="overview-grid">
+      <!-- GitHub Status Card -->
+      <div class="card glass-card">
+        <div class="card-header">
+          <div class="card-icon github-icon-bg">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+            </svg>
+          </div>
+          <div>
+            <h3>GitHub Authentication</h3>
+            <span class="sub-label" id="auth-sub-label">Checking token...</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="info-row">
+            <span class="label">Status</span>
+            <span class="value" id="github-auth-status">Checking...</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Authenticated User</span>
+            <span class="value code" id="github-user">—</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Target Repository</span>
+            <span class="value code" id="github-repo">—</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Target Branch</span>
+            <span class="value code" id="github-branch">main</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button id="test-connection-btn" class="btn btn-outline">
+            Test GitHub Access
+          </button>
+        </div>
+      </div>
+
+      <!-- Extension Connection Card -->
+      <div class="card glass-card">
+        <div class="card-header">
+          <div class="card-icon ext-icon-bg">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div>
+            <h3>Sync Pipeline</h3>
+            <span class="sub-label">Automatic push bridge</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="info-row">
+            <span class="label">Endpoint</span>
+            <span class="value code">http://localhost:3000/push</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Base Directory</span>
+            <span class="value code" id="github-base-dir">leetcode</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Total Syncs</span>
+            <span class="value highlight-number" id="sync-count-stat">0</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Anti-Duplicate Protection</span>
+            <span class="value text-success">Active (SHA-256)</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button id="send-test-push-btn" class="btn btn-primary">
+            Trigger Test Push
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Push History Section -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>Recent Push Operations</h2>
+          <p>History of solutions synchronized to your GitHub repository</p>
+        </div>
+        <button id="clear-history-btn" class="btn btn-sm btn-ghost">Clear Log</button>
+      </div>
+
+      <div class="card glass-card table-card">
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Problem</th>
+                <th>Language</th>
+                <th>Action</th>
+                <th>Target Path</th>
+                <th>Time</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body">
+              <tr class="empty-row">
+                <td colspan="6">
+                  <div class="empty-state">
+                    <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p>No pushes recorded yet. Submit a problem on LeetCode or run a test push!</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Setup Guide -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>Quick Setup Guide</h2>
+          <p>How to configure LeetPush Chrome Extension</p>
+        </div>
+      </div>
+
+      <div class="setup-grid">
+        <div class="setup-step glass-card">
+          <div class="step-num">1</div>
+          <h4>Load Extension in Chrome</h4>
+          <p>Open <code>chrome://extensions</code>, enable <strong>Developer Mode</strong>, and click <strong>Load unpacked</strong>. Select the <code>LeetPush/extension</code> directory.</p>
+        </div>
+        <div class="setup-step glass-card">
+          <div class="step-num">2</div>
+          <h4>Configure Repository &amp; Token</h4>
+          <p>Open <code>server/.env</code> and provide your GitHub Personal Access Token, Owner, and Repo (e.g., <code>RIKKY-J/LeetPush</code>).</p>
+        </div>
+        <div class="setup-step glass-card">
+          <div class="step-num">3</div>
+          <h4>Solve on LeetCode</h4>
+          <p>Visit any problem on LeetCode. Submit your code. Upon <strong>Accepted</strong>, LeetPush immediately pushes your solution to GitHub!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>LeetPush &copy; 2026 &bull; Designed for seamless LeetCode to GitHub synchronization &bull; <a href="https://github.com/RIKKY-J/LeetPush" target="_blank" rel="noopener">GitHub Repository</a></p>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

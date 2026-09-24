@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeetPush Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="ambient-glow top-glow"></div>
+  <div class="ambient-glow bottom-glow"></div>
+
+  <div class="options-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          </svg>
+        </div>
+        <div>
+          <h1>LeetPush Configuration</h1>
+          <p>Configure synchronization preferences for your GitHub repository</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge" id="mode-badge">Companion Mode</span>
+      </div>
+    </header>
+
+    <form id="settings-form">
+      <!-- Sync Architecture Mode -->
+      <div class="card glass-card">
+        <h3>Sync Architecture Mode</h3>
+        <p class="card-desc">Choose how the Chrome extension communicates with your GitHub repository.</p>
+        
+        <div class="mode-selector">
+          <label class="mode-option" id="mode-companion-label">
+            <input type="radio" name="syncMode" value="companion" id="mode-companion" checked>
+            <div class="mode-card">
+              <div class="mode-title">
+                <strong>Companion Server (Recommended)</strong>
+                <span class="badge-rec">Recommended</span>
+              </div>
+              <p>Uses local Node.js companion service. GitHub personal token is kept securely on localhost in <code>server/.env</code> and never exposed to the browser.</p>
+            </div>
+          </label>
+
+          <label class="mode-option" id="mode-direct-label">
+            <input type="radio" name="syncMode" value="direct" id="mode-direct">
+            <div class="mode-card">
+              <div class="mode-title">
+                <strong>Direct GitHub API (Standalone)</strong>
+              </div>
+              <p>Extension communicates directly with GitHub REST API using a Personal Access Token stored securely in Chrome storage. No local server required.</p>
+            </div>
+          </label>
+        </div>
+
+        <!-- Companion Server URL Config -->
+        <div class="form-group" id="companion-config-group">
+          <label for="serverUrl">Companion Server URL</label>
+          <input type="url" id="serverUrl" placeholder="http://localhost:3000" value="http://localhost:3000" required>
+          <span class="input-hint">Default local server runs on port 3000 (start via <code>npm run server</code>).</span>
+        </div>
+
+        <!-- Direct Token Config -->
+        <div class="form-group" id="direct-token-group" style="display: none;">
+          <label for="githubToken">GitHub Personal Access Token</label>
+          <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+          <span class="input-hint">Requires <code>repo</code> scope (classic) or Contents read/write (fine-grained).</span>
+        </div>
+      </div>
+
+      <!-- GitHub Repository Configuration -->
+      <div class="card glass-card">
+        <h3>GitHub Repository Details</h3>
+        <p class="card-desc">Specify where your LeetCode solutions should be committed.</p>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="owner">GitHub Owner / Organization</label>
+            <input type="text" id="owner" placeholder="e.g. RIKKY-J" value="RIKKY-J" required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="repo">Repository Name</label>
+            <input type="text" id="repo" placeholder="e.g. LeetPush" value="LeetPush" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="branch">Target Branch</label>
+            <input type="text" id="branch" placeholder="main" value="main" required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="baseDir">Base Directory in Repository</label>
+            <input type="text" id="baseDir" placeholder="leetcode" value="leetcode" required>
+            <span class="input-hint">Solutions will be saved at: <code>{baseDir}/{slug}/solution.{ext}</code></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Automation & Preferences -->
+      <div class="card glass-card">
+        <h3>Automation &amp; Notification Preferences</h3>
+
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="autoPush" checked>
+            <span class="custom-check"></span>
+            <div class="checkbox-text">
+              <strong>Automatically push accepted submissions</strong>
+              <p>Automatically triggers push as soon as LeetCode says "Accepted".</p>
+            </div>
+          </label>
+
+          <label class="checkbox-label">
+            <input type="checkbox" id="acceptedOnly" checked>
+            <span class="custom-check"></span>
+            <div class="checkbox-text">
+              <strong>Push only accepted submissions</strong>
+              <p>Ignore Wrong Answer, Time Limit Exceeded, or Compile Errors.</p>
+            </div>
+          </label>
+
+          <label class="checkbox-label">
+            <input type="checkbox" id="includeReadme" checked>
+            <span class="custom-check"></span>
+            <div class="checkbox-text">
+              <strong>Generate problem README.md</strong>
+              <p>Creates a clean problem description markdown file alongside the solution.</p>
+            </div>
+          </label>
+
+          <label class="checkbox-label">
+            <input type="checkbox" id="showNotifications" checked>
+            <span class="custom-check"></span>
+            <div class="checkbox-text">
+              <strong>Show desktop notifications</strong>
+              <p>Display a Chrome system notification upon successful push or error.</p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions-footer">
+        <button type="button" id="test-connection-btn" class="btn btn-outline">
+          Test Connection
+        </button>
+        <button type="submit" id="save-settings-btn" class="btn btn-primary">
+          Save Settings
+        </button>
+      </div>
+
+      <div id="status-message" class="status-message"></div>
+    </form>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

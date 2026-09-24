@@ -1,0 +1,22 @@
+{
+  "name": "leetpush",
+  "version": "1.0.0",
+  "description": "LeetCode to GitHub Auto-Pusher: Chrome Extension & Local Companion Server",
+  "scripts": {
+    "server": "npm --prefix server start",
+    "server:dev": "npm --prefix server run dev",
+    "server:install": "npm --prefix server install",
+    "test:server": "npm --prefix server test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RIKKY-J/LeetPush.git"
+  },
+  "keywords": ["leetcode", "github", "chrome-extension", "auto-pusher", "leetpush"],
+  "author": "RIKKY-J",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RIKKY-J/LeetPush/issues"
+  },
+  "homepage": "https://github.com/RIKKY-J/LeetPush#readme"
+}
