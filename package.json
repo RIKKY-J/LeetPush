@@ -6,7 +6,8 @@
     "server": "npm --prefix server start",
     "server:dev": "npm --prefix server run dev",
     "server:install": "npm --prefix server install",
-    "test:server": "npm --prefix server test"
+    "test:server": "npm --prefix server test",
+    "pack:extension": "powershell -Command \"Compress-Archive -Path extension/* -DestinationPath leetpush-extension.zip -Force\""
   },
   "repository": {
     "type": "git",
