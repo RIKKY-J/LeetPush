@@ -255,24 +255,22 @@ async function verifyGitHub(config = {}) {
   }
 
   try {
-    // 1. Verify user authentication
-    const userRes = await fetch("https://api.github.com/user", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github.v3+json",
-        "User-Agent": "LeetPush-Chrome-Extension"
+    let username = null;
+    try {
+      const userRes = await fetch("https://api.github.com/user", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github.v3+json",
+          "User-Agent": "LeetPush-Chrome-Extension"
+        }
+      });
+      if (userRes.ok) {
+        const userData = await userRes.json();
+        username = userData.login;
       }
-    });
-
-    if (!userRes.ok) {
-      if (userRes.status === 401) {
-        return { success: false, error: "Invalid GitHub token. Please verify or generate a new token." };
-      }
-      return { success: false, error: `GitHub error (HTTP ${userRes.status})` };
+    } catch (e) {
+      // Fine-grained tokens may restrict /user endpoint
     }
-
-    const userData = await userRes.json();
-    const username = userData.login;
 
     // 2. Verify repository write access
     if (owner && repo) {
