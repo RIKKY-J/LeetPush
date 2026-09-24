@@ -146,31 +146,108 @@ class LeetCodeSubmissionProvider {
   }
 
   /**
-   * Extracts language from the editor dropdown button
+   * Normalizes raw language strings (e.g., "C++", "python3", "Java") to standard keys
+   */
+  normalizeLanguage(rawLang) {
+    if (!rawLang) return null;
+    const clean = rawLang.trim().toLowerCase();
+
+    if (clean === "c++" || clean === "cpp") return "cpp";
+    if (clean === "c") return "c";
+    if (clean === "java") return "java";
+    if (clean === "c#" || clean === "csharp" || clean === "cs") return "csharp";
+    if (clean.includes("python3") || clean === "python 3") return "python3";
+    if (clean === "python" || clean === "py") return "python";
+    if (clean.includes("javascript") || clean === "js") return "javascript";
+    if (clean.includes("typescript") || clean === "ts") return "typescript";
+    if (clean === "golang" || clean === "go") return "go";
+    if (clean === "rust" || clean === "rs") return "rust";
+    if (clean === "kotlin" || clean === "kt") return "kotlin";
+    if (clean === "swift") return "swift";
+    if (clean === "ruby" || clean === "rb") return "ruby";
+    if (clean === "php") return "php";
+    if (clean === "dart") return "dart";
+    if (clean === "scala") return "scala";
+    if (clean.includes("sql")) return "mysql";
+
+    return clean;
+  }
+
+  /**
+   * Extracts language using multiple redundant strategies
    */
   getCurrentLanguage() {
-    // LeetCode language dropdown button
+    // Strategy 1: Check LeetCode's localStorage settings
+    try {
+      const localLang = localStorage.getItem("global_lang") ||
+                        localStorage.getItem("last_selected_lang") ||
+                        localStorage.getItem("dynamic_layout_language");
+      if (localLang) {
+        const norm = this.normalizeLanguage(localLang);
+        if (norm) {
+          console.log("[LeetPush] Detected language from localStorage:", norm);
+          return norm;
+        }
+      }
+    } catch (e) {
+      // localStorage may be sandboxed
+    }
+
+    // Strategy 2: Check Monaco Editor's data-mode-id attribute
+    const monacoEl = document.querySelector('[data-mode-id]');
+    if (monacoEl) {
+      const modeId = monacoEl.getAttribute('data-mode-id');
+      const norm = this.normalizeLanguage(modeId);
+      if (norm) {
+        console.log("[LeetPush] Detected language from Monaco data-mode-id:", norm);
+        return norm;
+      }
+    }
+
+    // Strategy 3: Check editor toolbar language button
     const btnCandidates = [
       'button[id*="headlessui-listbox-button"]',
       'button[data-cy="lang-select"]',
-      'div[class*="select-container"] button',
+      'div[class*="editor"] button',
+      'div[class*="toolbar"] button',
       'button[aria-haspopup="listbox"]'
+    ];
+
+    const knownLangs = [
+      "c++", "java", "python3", "python", "c", "c#", "javascript",
+      "typescript", "go", "rust", "kotlin", "swift", "php", "ruby", "dart", "scala"
     ];
 
     for (const selector of btnCandidates) {
       const buttons = document.querySelectorAll(selector);
       for (const btn of buttons) {
         const text = btn.textContent.trim().toLowerCase();
-        // Check if button text matches any known language
-        for (const langKey of Object.keys(LEETPUSH_LANGUAGES)) {
-          if (text === langKey || text.startsWith(langKey)) {
-            return langKey;
+        for (const lang of knownLangs) {
+          if (text === lang || text.startsWith(lang + " ") || text.startsWith(lang + "\n")) {
+            const norm = this.normalizeLanguage(lang);
+            console.log("[LeetPush] Detected language from button:", norm);
+            return norm;
           }
         }
       }
     }
 
-    return "python3"; // Default fallback
+    // Strategy 4: Check submission result panel for language tag
+    const resultPanels = document.querySelectorAll('[data-e2e-locator="submission-result"], div[class*="result"]');
+    for (const panel of resultPanels) {
+      const parent = panel.closest('div') || panel;
+      const text = parent.innerText || "";
+      for (const lang of knownLangs) {
+        const regex = new RegExp(`\\b${lang.replace('+', '\\+')}\\b`, 'i');
+        if (regex.test(text)) {
+          const norm = this.normalizeLanguage(lang);
+          console.log("[LeetPush] Detected language from result panel:", norm);
+          return norm;
+        }
+      }
+    }
+
+    return "cpp"; // Safe default if none matched
   }
 
   /**
@@ -230,8 +307,8 @@ class LeetCodeSubmissionProvider {
     runtime = "",
     memory = ""
   } = {}) {
-    const currentProb = problem || this.getCurrentProblem();
-    const finalLang = language || this.getCurrentLanguage();
+    const rawLang = language || this.getCurrentLanguage();
+    const finalLang = this.normalizeLanguage(rawLang) || "cpp";
     const finalCode = code || this.getCodeFromEditor() || "";
 
     return {

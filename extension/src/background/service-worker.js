@@ -381,11 +381,17 @@ async function recordSuccessfulSync(submission, result, { owner, repo, branch, s
 
 function getLanguageExtension(language) {
   if (!language) return "txt";
+  const clean = language.toLowerCase().trim();
   const map = {
-    python: "py", python3: "py", cpp: "cpp", "c++": "cpp", c: "c", java: "java",
-    javascript: "js", js: "js", typescript: "ts", ts: "ts", go: "go", rust: "rs",
-    kotlin: "kt", swift: "swift", csharp: "cs", php: "php", ruby: "rb",
-    scala: "scala", dart: "dart", mysql: "sql", postgresql: "sql", bash: "sh"
+    cpp: "cpp", "c++": "cpp", c: "c", java: "java",
+    python: "py", python3: "py", py: "py",
+    csharp: "cs", "c#": "cs", cs: "cs",
+    javascript: "js", js: "js", typescript: "ts", ts: "ts",
+    golang: "go", go: "go", rust: "rs", rs: "rs",
+    kotlin: "kt", kt: "kt", swift: "swift",
+    php: "php", ruby: "rb", rb: "rb",
+    scala: "scala", dart: "dart",
+    mysql: "sql", postgresql: "sql", sql: "sql", bash: "sh", sh: "sh"
   };
-  return map[language.toLowerCase().trim()] || "txt";
+  return map[clean] || (clean.includes("python") ? "py" : clean.includes("cpp") || clean.includes("c++") ? "cpp" : clean.includes("java") ? "java" : "txt");
 }
