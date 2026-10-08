@@ -1,6 +1,7 @@
 {
   "manifest_version": 3,
   "name": "LeetPush — LeetCode to GitHub Auto-Pusher",
+  "short_name": "LeetPush",
   "version": "1.0.0",
   "description": "Automatically sync accepted LeetCode submissions directly to your GitHub repository with zero friction.",
   "author": "RIKKY-J",

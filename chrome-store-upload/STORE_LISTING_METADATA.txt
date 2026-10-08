@@ -1,0 +1,115 @@
+================================================================================
+CHROME WEB STORE PUBLISHING CHEAT SHEET & COPY-PASTE DATA
+================================================================================
+
+Folder location on your computer:
+C:\Users\RIKKY\Desktop\Updated_version\LeetPush\chrome-store-upload
+
+Files in this folder:
+1. leetpush-extension.zip       -> Upload this on the Packages page
+2. icon-128.png                 -> Upload in Store Listing -> Store icon (128x128)
+3. screenshot-1-auto-sync.jpg   -> Upload in Screenshots (1280x800 JPEG - 100% recommended, no alpha!)
+   screenshot-1-auto-sync.png   -> (Alternative 24-bit PNG)
+4. screenshot-2-popup.jpg       -> Upload in Screenshots (1280x800 JPEG)
+   screenshot-2-popup.png       -> (Alternative 24-bit PNG)
+5. screenshot-3-github-repo.jpg -> Upload in Screenshots (1280x800 JPEG)
+   screenshot-3-github-repo.png -> (Alternative 24-bit PNG)
+6. screenshot-4-token-setup.jpg -> Upload in Screenshots (1280x800 JPEG - Fine-grained Token Setup)
+   screenshot-4-token-setup.png -> (Alternative 24-bit PNG)
+7. promo-small-440x280.jpg      -> Upload in Small promo tile (440x280)
+   promo-small-440x280.png      -> (Alternative PNG)
+8. promo-marquee-1400x560.jpg   -> Upload in Marquee promo tile (1400x560)
+   promo-marquee-1400x560.png   -> (Alternative PNG)
+9. PRIVACY_POLICY.md            -> Uploaded/hosted on GitHub
+
+--------------------------------------------------------------------------------
+1. STORE LISTING TAB
+--------------------------------------------------------------------------------
+
+[Name]:
+LeetPush — LeetCode to GitHub Auto-Pusher
+
+[Summary (Short description - under 132 characters)]:
+Automatically sync accepted LeetCode submissions directly to your GitHub repository with zero friction.
+
+[Detailed Description]:
+(Copy and paste the block below into the Detailed Description box)
+--------------------------------------------------------------------------------
+🚀 LeetPush — Automatically Sync LeetCode Solutions to GitHub with Zero Friction!
+
+Stop manually copying and pasting your solutions after solving LeetCode problems. LeetPush bridges your daily algorithm practice with your developer portfolio on GitHub. The instant you get an "Accepted" verdict, LeetPush extracts the exact submitted code and commits it directly to your GitHub repository.
+
+⚡ KEY FEATURES
+
+• 🚀 Instant Automatic Push: Submissions are synchronized the moment LeetCode confirms an "Accepted" status.
+• 🎯 Dual-Tier Code Extraction: Intercepts network responses to guarantee the exact submitted code is captured (rather than unsaved draft editor edits).
+• 🛡️ Anti-Duplicate Fingerprinting: Uses cryptographic SHA-256 hashes (slug + language + code) so repeated submissions or duplicate clicks never pollute your Git commit log.
+• 📁 Clean Multi-Language Portfolio: Automatically organizes solutions into clean directories with problem folders, multi-language solutions, and optional formatted problem READMEs with difficulty badges.
+• 🌐 18+ Supported Languages: Python (2/3), C++, Java, JavaScript, TypeScript, Go, Rust, C, Kotlin, Swift, C#, PHP, Ruby, Scala, Dart, SQL, Bash, and more.
+• 🔒 100% Client-Side & Private: Runs completely in your browser. Your Personal Access Token stays strictly inside Chrome's private local storage. No middleman servers or third-party tracking.
+• 🎛️ Minimalist Modern UI: Includes a floating in-page status pill on LeetCode, a fast popup dashboard, and customizable options.
+
+🛠️ SUPER SIMPLE 60-SECOND SETUP
+
+1. Install LeetPush and click the extension icon in your Chrome toolbar.
+2. Enter your GitHub repository address (e.g., username/leetcode-practice).
+3. Paste your GitHub Personal Access Token (requires 'repo' scope).
+4. Solve any problem on LeetCode — once Accepted, your code is live on GitHub!
+
+🔒 PRIVACY & SECURITY FIRST
+
+• Zero Telemetry & Analytics: We do not track, collect, or store any of your data.
+• Direct GitHub Communication: All requests travel securely from your browser directly to api.github.com.
+• Open Source: Fully transparent code available on GitHub.
+
+Open source repository: https://github.com/RIKKY-J/LeetPush
+--------------------------------------------------------------------------------
+
+[Category]:
+Developer Tools  (or Productivity)
+
+[Language]:
+English
+
+--------------------------------------------------------------------------------
+2. PRIVACY PRACTICES TAB (CRUCIAL FOR FAST APPROVAL)
+--------------------------------------------------------------------------------
+
+[Single Purpose Description]:
+Automatically synchronizes accepted LeetCode problem solutions and formatted problem descriptions directly to the user's personal GitHub repository.
+
+[Permission Justification - storage]:
+Used to save the user's target GitHub repository name, target branch, and personal access token locally within Chrome's private storage.
+
+[Permission Justification - notifications]:
+Used to display an unobtrusive desktop notification when a solution is successfully pushed to GitHub or if an authentication error occurs.
+
+[Host Permission Justification - https://leetcode.com/* and https://leetcode.cn/*]:
+Required to detect when a problem solution receives an 'Accepted' verdict and extract the submitted code on LeetCode problem pages.
+
+[Host Permission Justification - https://api.github.com/*]:
+Required to commit and push solution files and problem README markdown directly to the user's configured GitHub repository.
+
+[Data Usage Questions]:
+- Do you collect user data? -> Select NO
+- Check all 4 developer certification checkboxes at the bottom:
+  [X] Complies with Limited Use policy
+  [X] Does not sell user data
+  [X] Does not transfer data for unrelated purposes
+  [X] Does not use data for creditworthiness or lending
+
+[Privacy Policy URL]:
+https://github.com/RIKKY-J/LeetPush/blob/main/PRIVACY_POLICY.md
+
+--------------------------------------------------------------------------------
+3. ACCOUNT / REVIEWER TESTING INSTRUCTIONS (NOTES FOR REVIEWER)
+--------------------------------------------------------------------------------
+Testing Instructions:
+1. LeetPush operates entirely client-side without third-party intermediate servers.
+2. To test the extension:
+   - Click the LeetPush extension icon in the toolbar.
+   - Enter a target GitHub repository address (e.g., 'username/repo') and a GitHub Personal Access Token with 'repo' scope.
+   - Click 'Test Connection' in Settings to validate the GitHub API connection.
+   - Navigate to any problem on leetcode.com (e.g., https://leetcode.com/problems/two-sum/).
+   - When a solution is submitted and accepted, the extension captures the code and pushes it to the configured repository.
+================================================================================

@@ -5,9 +5,9 @@
  */
 
 const DEFAULT_SETTINGS = {
-  repoUrl: "https://github.com/RIKKY-J/LeetPush.git",
-  owner: "RIKKY-J",
-  repo: "LeetPush",
+  repoUrl: "",
+  owner: "",
+  repo: "",
   branch: "main",
   baseDir: "leetcode",
   githubToken: "",
@@ -85,8 +85,8 @@ async function handleDirectPush(submission) {
   const settings = await getStoredSettings();
 
   const token = settings.githubToken ? settings.githubToken.trim() : "";
-  const owner = settings.owner || "RIKKY-J";
-  const repo = settings.repo || "LeetPush";
+  const owner = (settings.owner || "").trim();
+  const repo = (settings.repo || "").trim();
   const branch = settings.branch || "main";
   const baseDir = (settings.baseDir || "leetcode").replace(/^\/+|\/+$/g, "");
 
@@ -94,7 +94,7 @@ async function handleDirectPush(submission) {
     throw new Error("GitHub Personal Access Token is missing. Click the LeetPush extension icon to add your token.");
   }
   if (!owner || !repo) {
-    throw new Error("GitHub Repository is not configured. Click the LeetPush extension icon to set your repository URL.");
+    throw new Error("GitHub Repository is not configured. Click the LeetPush extension icon to set your repository address.");
   }
 
   const slug = (submission.problem.slug || "solution").toLowerCase().replace(/[^a-z0-9_-]/g, "-");

@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Load existing settings
   chrome.storage.local.get(["settings"], (res) => {
     const s = res.settings || {};
-    repoUrlInput.value = s.repoUrl || (s.owner && s.repo ? `https://github.com/${s.owner}/${s.repo}` : "https://github.com/RIKKY-J/LeetPush.git");
+    repoUrlInput.value = s.repoUrl || (s.owner && s.repo ? `https://github.com/${s.owner}/${s.repo}` : "");
     branchInput.value = s.branch || "main";
     baseDirInput.value = s.baseDir || "leetcode";
     githubTokenInput.value = s.githubToken || "";

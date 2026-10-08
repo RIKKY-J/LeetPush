@@ -82,9 +82,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Populate token if stored
     if (s.githubToken) {
       githubTokenInput.value = s.githubToken;
-      setConnectedUI(s.owner || "RIKKY-J", s.repo || "LeetPush");
+      if (s.owner && s.repo) {
+        setConnectedUI(s.owner, s.repo);
+      } else {
+        setSetupNeededUI("Repo Missing");
+      }
     } else {
-      setSetupNeededUI("Token Missing");
+      setSetupNeededUI("Setup Needed");
     }
 
     // Last submission card

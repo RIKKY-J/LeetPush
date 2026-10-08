@@ -117,7 +117,7 @@
           action: response.action
         });
       } else {
-        const errorMsg = response?.error || "Companion server error or network issue";
+        const errorMsg = response?.error || "GitHub API or network issue";
         console.error("[LeetPush] Push failed:", errorMsg);
         ui.setError(errorMsg, () => executePush(submission, fingerprint));
       }
